@@ -11,22 +11,25 @@ class Keybindings < Formula
     odie "keybindings only supports Apple Silicon (arm64) Macs" if Hardware::CPU.intel?
 
     app_dir_name = "keybindings.app"
-    candidate = buildpath/app_dir_name
+    bundle_path = buildpath/app_dir_name
 
-    if candidate.directory?
-      app_path = candidate
+    if bundle_path.directory?
+      # Normal case: archive contained keybindings.app at top level.
+      prefix.install app_dir_name
+    elsif (buildpath/"Contents/Info.plist").exist?
+      # Flattened case: we are already inside what should be keybindings.app.
+      (prefix/app_dir_name).install Dir["*"]
     else
-      # Fallback search (any depth) for an exact match.
-      app_path = Dir.glob("**/#{app_dir_name}").find { |p| File.basename(p) == app_dir_name }
+      # Fallback: search any depth (exact match) then pattern.
+      found_exact = Dir.glob("**/#{app_dir_name}").find { |p| File.basename(p) == app_dir_name }
+      if found_exact && File.directory?(found_exact)
+        prefix.install found_exact
+      else
+        # List discovered .app bundles (likely only helpers) for diagnostics.
+        discovered = Dir.glob("**/*.app").map { |p| p.sub(/^\.\//, '') }.uniq.sort
+        odie "#{app_dir_name} not found. Discovered bundles: #{discovered.empty? ? '(none)' : discovered.join(', ')}"
+      end
     end
-
-    unless app_path && File.directory?(app_path)
-      found = Dir.glob("**/*.app").map { |p| p.sub(/^\.\//, '') }.uniq.sort
-      opoo "Debug listing (max depth 2):" if found.empty?
-      odie "#{app_dir_name} not found in archive. Discovered app bundles: #{found.empty? ? "(none)" : found.join(', ')}"
-    end
-
-    prefix.install app_path
 
     # Launcher script to open the GUI app.
     (bin/"keybindings").write <<~EOS
