@@ -1,8 +1,10 @@
 cask "keybindings" do
-  arch arm: "arm64"
+  arch arm: "arm64", intel: "x64"
 
   version "1.0.1"
-  sha256 "6124e3d2f7227e7378419b634ce5daff739a4dcc468355f13e0f622711e9d12d"
+  # NOTE: Replace the placeholder Intel sha256 with the real value (run: shasum -a 256 keybindings-darwin-x64-#{version}.zip)
+  sha256 arm: "6124e3d2f7227e7378419b634ce5daff739a4dcc468355f13e0f622711e9d12d",
+         intel: "3c3739881fc02e32f423d1617808a5770250a261c439c98a3ce5d51f6e9f6c6c"
 
   url "https://github.com/daschaa/keybindings/releases/download/v#{version}/keybindings-darwin-#{arch}-#{version}.zip"
   name "keybindings"
@@ -15,7 +17,6 @@ cask "keybindings" do
   end
 
   auto_updates false
-  depends_on arch: :arm64
   depends_on macos: ">= :big_sur"
 
   app "keybindings.app"
@@ -35,7 +36,6 @@ cask "keybindings" do
 
   caveats do
     <<~EOS
-      Only Apple Silicon (arm64) is supported.
       Launch from /Applications or run: open -a keybindings
       If Gatekeeper blocks the first launch, right-click the app and choose Open.
     EOS
