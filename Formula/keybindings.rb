@@ -19,12 +19,6 @@ class Keybindings < Formula
     # Install the .app bundle.
     prefix.install app_path
 
-    # Remove quarantine if present (optional).
-    potential = prefix/File.basename(app_path)
-    if OS.mac? && system("xattr", "-p", "com.apple.quarantine", potential.to_s)
-      system "xattr", "-d", "com.apple.quarantine", potential.to_s
-    end
-
     (bin/"keybindings").write <<~EOS
       #!/bin/bash
       open "#{prefix}/#{File.basename(app_path)}" "$@"
