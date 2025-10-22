@@ -1,3 +1,4 @@
+# ruby
 class Keybindings < Formula
   desc "Little app to show your (favorite) keybindings"
   homepage "https://github.com/daschaa/keybindings"
@@ -5,47 +6,38 @@ class Keybindings < Formula
   sha256 "0d9df33f2d74306c724f16f8b449e268229c4a9bdebe475f4c8c9dbd7d751d27"
   license "MIT"
 
-  # Restrict to Apple Silicon only.
-  depends_on arch: :arm64
-
   def install
     if Hardware::CPU.intel?
       odie "Keybindings only supports Apple Silicon (arm64) Macs."
     end
 
-    app_name = "keybindings.app" # Match Electron productName capitalization.
-    unless File.directory?(app_name)
-      odie "Expected #{app_name} in the archive, but it was not found."
-    end
+    # Locate the .app (handles capitalization and nested directory).
+    app_path = Dir.glob("**/*.app").find { |p| File.basename(p).casecmp("keybindings.app").zero? } ||
+               Dir.glob("**/*.app").first
+    odie "No .app bundle found in the archive." unless app_path
 
-    prefix.install app_name
+    # Install the .app bundle.
+    prefix.install app_path
 
-    # Attempt to remove the macOS quarantine attribute if present to avoid first-launch warnings.
-    if OS.mac?
-      app_path = prefix/app_name
-      # Check if the attribute exists; ignore failures quietly.
-      if system("xattr", "-p", "com.apple.quarantine", app_path.to_s)
-        system "xattr", "-d", "com.apple.quarantine", app_path.to_s
-      end
+    # Remove quarantine if present (optional).
+    potential = prefix/File.basename(app_path)
+    if OS.mac? && system("xattr", "-p", "com.apple.quarantine", potential.to_s)
+      system "xattr", "-d", "com.apple.quarantine", potential.to_s
     end
 
     (bin/"keybindings").write <<~EOS
       #!/bin/bash
-      open "#{prefix}/#{app_name}" "$@"
+      open "#{prefix}/#{File.basename(app_path)}" "$@"
     EOS
     chmod 0755, bin/"keybindings"
   end
 
   def caveats
     <<~EOS
-      Keybindings is a GUI application. Launch it via:
+      GUI app. Launch with:
         keybindings
-      or from Finder at:
-        #{prefix}/keybindings.app
-
-      This build is only available for Apple Silicon (arm64) Macs.
-
-      The formula attempts to remove the macOS quarantine attribute automatically. If macOS still blocks the app, open it once via Finder (Right-click > Open) to approve it.
+      Only Apple Silicon is supported.
+      If macOS warns on first launch, right-click the app in Finder and choose Open.
     EOS
   end
 
