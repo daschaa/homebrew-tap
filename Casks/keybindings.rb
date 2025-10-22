@@ -15,9 +15,8 @@ cask "keybindings" do
   end
 
   auto_updates false
-  conflicts_with formula: "keybindings"
-  depends_on macos: ">= :big_sur"
   depends_on arch: :arm64
+  depends_on macos: ">= :big_sur"
 
   app "keybindings.app"
 
