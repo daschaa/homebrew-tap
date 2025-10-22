@@ -7,29 +7,24 @@ class Keybindings < Formula
   license "MIT"
 
   def install
-    if Hardware::CPU.intel?
-      odie "Keybindings only supports Apple Silicon (arm64) Macs."
-    end
+    odie "Keybindings only supports Apple Silicon (arm64) Macs." if Hardware::CPU.intel?
 
-    # Locate the .app (handles capitalization and nested directory).
-    app_path = Dir.glob("**/*.app").find { |p| File.basename(p).casecmp("keybindings.app").zero? } ||
-               Dir.glob("**/*.app").first
-    odie "No .app bundle found in the archive." unless app_path
+    # Prefer a top-level keybindings.app; avoid nested helper bundles.
+    app_path = Dir["keybindings.app"].first || Dir["**/keybindings.app"].first
+    odie "keybindings.app not found in archive." unless app_path
 
-    # Install the .app bundle.
     prefix.install app_path
 
     (bin/"keybindings").write <<~EOS
       #!/bin/bash
-      open "#{prefix}/#{File.basename(app_path)}" "$@"
+      open "#{prefix}/keybindings.app" "$@"
     EOS
     chmod 0755, bin/"keybindings"
   end
 
   def caveats
     <<~EOS
-      GUI app. Launch with:
-        keybindings
+      Launch with: keybindings
       Only Apple Silicon is supported.
       If macOS warns on first launch, right-click the app in Finder and choose Open.
     EOS
