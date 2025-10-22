@@ -4,7 +4,7 @@ class Keybindings < Formula
   homepage "https://github.com/daschaa/keybindings"
   version "1.0.1"
   url "https://github.com/daschaa/keybindings/releases/download/v#{version}/keybindings-darwin-arm64-#{version}.zip"
-  sha256 "0d9df33f2d74306c724f16f8b449e268229c4a9bdebe475f4c8c9dbd7d751d27"
+  sha256 "sha256:6124e3d2f7227e7378419b634ce5daff739a4dcc468355f13e0f622711e9d12d"
   license "MIT"
 
   def install
