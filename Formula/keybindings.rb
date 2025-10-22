@@ -2,7 +2,7 @@
 class Keybindings < Formula
   desc "Little app to show your (favorite) keybindings"
   homepage "https://github.com/daschaa/keybindings"
-  version "1.0.0"
+  version "1.0.1"
   url "https://github.com/daschaa/keybindings/releases/download/v#{version}/keybindings-darwin-arm64-#{version}.zip"
   sha256 "0d9df33f2d74306c724f16f8b449e268229c4a9bdebe475f4c8c9dbd7d751d27"
   license "MIT"
