@@ -10,7 +10,8 @@ class Keybindings < Formula
     odie "Keybindings only supports Apple Silicon (arm64) Macs." if Hardware::CPU.intel?
 
     # Prefer a top-level keybindings.app; avoid nested helper bundles.
-    app_path = Dir["keybindings.app"].first || Dir["**/keybindings.app"].first
+    app_path = Dir.glob("**/*.app").find { |p| File.basename(p).casecmp("keybindings.app").zero? } ||
+                   Dir.glob("**/*.app").first
     odie "keybindings.app not found in archive." unless app_path
 
     prefix.install app_path
