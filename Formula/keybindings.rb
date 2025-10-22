@@ -7,54 +7,14 @@ class Keybindings < Formula
   sha256 "6124e3d2f7227e7378419b634ce5daff739a4dcc468355f13e0f622711e9d12d"
   license "MIT"
 
+  # Electron GUI bundle triggers Homebrew dylib ID rewriting failures; use the cask instead.
+  disable! date: "2025-10-22", because: "Use the 'keybindings' cask (GUI app) – formula install_name fixups break signed Electron frameworks"
+
   def install
-    odie "keybindings only supports Apple Silicon (arm64) Macs" if Hardware::CPU.intel?
-
-    app_dir_name = "keybindings.app"
-    bundle_path = buildpath/app_dir_name
-
-    if bundle_path.directory?
-      # Normal case: archive contained keybindings.app at top level.
-      prefix.install app_dir_name
-    elsif (buildpath/"Contents/Info.plist").exist?
-      # Flattened case: we are already inside what should be keybindings.app.
-      (prefix/app_dir_name).install Dir["*"]
-    else
-      # Fallback: search any depth (exact match) then pattern.
-      found_exact = Dir.glob("**/#{app_dir_name}").find { |p| File.basename(p) == app_dir_name }
-      if found_exact && File.directory?(found_exact)
-        prefix.install found_exact
-      else
-        # List discovered .app bundles (likely only helpers) for diagnostics.
-        discovered = Dir.glob("**/*.app").map { |p| p.sub(/^\.\//, '') }.uniq.sort
-        odie "#{app_dir_name} not found. Discovered bundles: #{discovered.empty? ? '(none)' : discovered.join(', ')}"
-      end
-    end
-
-    # Launcher script to open the GUI app.
-    (bin/"keybindings").write <<~EOS
-      #!/bin/bash
-      open "#{prefix}/#{app_dir_name}" "$@"
-    EOS
-    chmod 0755, bin/"keybindings"
-  end
-
-  def caveats
-    <<~EOS
-      Launch with: keybindings
-      Only Apple Silicon is supported.
-      macOS Gatekeeper quarantine is normally removed by Homebrew; no manual xattr needed.
-      If macOS warns on first launch, right-click the app bundle and choose Open once.
-    EOS
-  end
-
-  livecheck do
-    url :homepage
-    regex(/keybindings[._-]darwin[._-]arm64[._-]v?(\d+(?:\.\d+)+)\.zip/i)
+    odie "This formula is disabled. Install via: brew install --cask daschaa/tap/keybindings"
   end
 
   test do
-    assert_predicate bin/"keybindings", :exist?
-    assert_predicate prefix/"keybindings.app", :directory?
+    system "true"
   end
 end
